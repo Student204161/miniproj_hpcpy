@@ -43,7 +43,7 @@ def summary_stats(u, interior_mask):
 
 
 if __name__ == '__main__':
-    t = time()
+    t = time.time()
     # Load data
     LOAD_DIR = '/dtu/projects/02613_2025/data/modified_swiss_dwellings/'
     with open(join(LOAD_DIR, 'building_ids.txt'), 'r') as f:
