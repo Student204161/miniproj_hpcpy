@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 
+import time
 
 def load_data(load_dir, bid):
     SIZE = 512
@@ -42,6 +43,7 @@ def summary_stats(u, interior_mask):
 
 
 if __name__ == '__main__':
+    t = time()
     # Load data
     LOAD_DIR = '/dtu/projects/02613_2025/data/modified_swiss_dwellings/'
     with open(join(LOAD_DIR, 'building_ids.txt'), 'r') as f:
@@ -76,3 +78,4 @@ if __name__ == '__main__':
     for bid, u, interior_mask in zip(building_ids, all_u, all_interior_mask):
         stats = summary_stats(u, interior_mask)
         print(f"{bid},", ", ".join(str(stats[k]) for k in stat_keys))
+    print("Time taken:", time() - t)
