@@ -9,7 +9,10 @@
 #BSUB -u s204161@dtu.dk
 #BSUB -B
 #BSUB -N
-#BSUB -o run_%J.out
-#BSUB -e run_%J.err
+if [ ! -d "jobs" ]; then
+    mkdir jobs
+fi
+#BSUB -o jobs/run_%J.out
+#BSUB -e jobs/run_%J.err
 
 python simulate.py 20 
