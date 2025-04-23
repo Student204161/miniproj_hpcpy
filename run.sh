@@ -15,4 +15,9 @@ fi
 #BSUB -o jobs/run_%J.out
 #BSUB -e jobs/run_%J.err
 
+source /dtu/projects/02613_2025/conda/conda_init.sh
+conda activate 02613
+
+
+
 python simulate.py 20 
