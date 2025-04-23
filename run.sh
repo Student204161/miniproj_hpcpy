@@ -9,7 +9,7 @@
 #BSUB -u s204161@dtu.dk
 #BSUB -B
 #BSUB -N
-#BSUB -o 1_6_%J.out
-#BSUB -e 1_6_%J.err
+#BSUB -o run_%J.out
+#BSUB -e run_%J.err
 
 python simulate.py 20 
