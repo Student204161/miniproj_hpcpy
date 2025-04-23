@@ -8,9 +8,8 @@ __pycache__
 *.whl
 *.ipynb_checkpoints
 *.logs
-/logs
-/errors
 *.out
+*.err
 *.tmp
 *.csv
 *.json
