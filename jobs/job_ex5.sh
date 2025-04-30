@@ -1,7 +1,7 @@
 #!/bin/bash
 #BSUB -J ex5
 #BSUB -q hpc
-#BSUB -W 01:30
+#BSUB -W 03:00
 #BSUB -R "rusage[mem=50MB]"
 #BSUB -n 20
 #BSUB -R "span[hosts=1]"
@@ -15,4 +15,5 @@ lscpu
 
 source /dtu/projects/02613_2024/conda/conda_init.sh
 conda activate 02613
-time python3 ../ex5/simulate_ex5.py 20 1,2,4,8,12,16,20
+
+time python3 ../ex5/simulate_ex5.py 50 1,2,4,8,12,16,20

@@ -35,16 +35,22 @@ def summary_stats(u, interior_mask):
 
 def process_building(args):
     bid, load_dir, max_iter, abs_tol = args
+    start = time.time()
     u0, interior_mask = load_data(load_dir, bid)
     u = jacobi(u0, interior_mask, max_iter, abs_tol)
     stats = summary_stats(u, interior_mask)
-    return bid, stats
+    elapsed = time.time() - start
+    return bid, stats, elapsed
+
 
 def run_parallel(building_ids, load_dir, max_iter, abs_tol, num_workers):
     args = [(bid, load_dir, max_iter, abs_tol) for bid in building_ids]
     with Pool(num_workers) as pool:
         results = pool.map(process_building, args)
-    return
+
+    for bid, stats, elapsed in results:
+        print(f"[{bid}] processed in {elapsed:.2f} seconds")
+
 
 def main():
     LOAD_DIR = '/dtu/projects/02613_2025/data/modified_swiss_dwellings/'
@@ -61,51 +67,16 @@ def main():
 
     MAX_ITER = 20_000
     ABS_TOL = 1e-4
+    num_workers = 20
 
-    timings = {}
-    for num_workers in workers_list:
-        print(f"\nRunning with {num_workers} workers...")
-        
-        start_time = time.time()
-        run_parallel(building_ids, LOAD_DIR, MAX_ITER, ABS_TOL, num_workers)
-        duration = time.time() - start_time
-        
-        print(f"Processed {N} buildings with {num_workers} workers.")
-        print(f"Time taken with {num_workers} workers: {duration:.2f} seconds")
-        timings[num_workers] = duration
+    print(f"\nRunning with {num_workers} workers...")
     
-    # Plot speedup and time taken
-    worker_counts = sorted(timings.keys())
-    times = [timings[w] for w in worker_counts]
-    baseline_time = timings[min(worker_counts)]
-    speedups = [baseline_time / t for t in times]
-
-    fig, ax1 = plt.subplots(figsize=(8, 6))
-
-    # Plot speedup
-    line1, = ax1.plot(worker_counts, speedups, marker='o', color='blue', label='Speedup')
-    ax1.set_xlabel('Number of Workers')
-    ax1.set_ylabel('Speedup', color='blue')
-    ax1.tick_params(axis='y', labelcolor='blue')
-
-    # Plot time on secondary y-axis
-    ax2 = ax1.twinx()
-    line2, = ax2.plot(worker_counts, times, marker='s', color='red', label='Time Taken')
-    ax2.set_ylabel('Time Taken (s)', color='red')
-    ax2.tick_params(axis='y', labelcolor='red')
-
-    # Combine legends from both axes
-    lines = [line1, line2]
-    labels = [line.get_label() for line in lines]
-    ax1.legend(lines, labels, loc='upper right')
-
-    plt.title('Speedup and Time Taken vs Number of Workers')
-    fig.tight_layout()
-    plt.grid(True)
-    plt.savefig("speedup_and_time_plot_50floors_stupid.png")
-    print("\nSaved plot as 'speedup_and_time_plot.png'")
-
-
+    start_time = time.time()
+    run_parallel(building_ids, LOAD_DIR, MAX_ITER, ABS_TOL, num_workers)
+    duration = time.time() - start_time
+    
+    print(f"Processed {N} buildings with {num_workers} workers.")
+    print(f"Time taken with {num_workers} workers: {duration:.2f} seconds")  
 
 if __name__ == '__main__':
     main()
