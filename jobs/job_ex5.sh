@@ -15,4 +15,4 @@ lscpu
 
 source /dtu/projects/02613_2024/conda/conda_init.sh
 conda activate 02613
-time python3 ../ex5/simulate_ex5.py 10 1,2,4,8,16,20
+time python3 ../ex5/simulate_ex5.py 50 1,2,4,8,12,16,20,24,28
