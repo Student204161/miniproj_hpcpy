@@ -16,6 +16,5 @@ fi
 source /dtu/projects/02613_2025/conda/conda_init.sh
 conda activate 02613
 
-
-kernprof script_task8.py 20
+kernprof -l -v script_task8.py 20
 #python script_task8.py 20 
