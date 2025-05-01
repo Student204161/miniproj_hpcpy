@@ -60,7 +60,7 @@ def helper(u0, interior_mask, MAX_ITER):
     u_new = cuda.to_device(np.copy(u0))
     interior_mask_d = cuda.to_device(interior_mask)
 
-    #u_new is just zeros
+    #u_new is just zeross
     interior_mask = cuda.to_device(interior_mask)
     blockspergrid_x = (interior_mask.shape[0] + threadsperblock[0] - 1) // threadsperblock[0]
     blockspergrid_y = (interior_mask.shape[1] + threadsperblock[1] - 1) // threadsperblock[1]
@@ -75,8 +75,7 @@ def helper(u0, interior_mask, MAX_ITER):
     return u
 
 
-
-#@profile
+@profile
 def main():
         # Load data
     LOAD_DIR = 'data'

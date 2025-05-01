@@ -41,7 +41,7 @@ def summary_stats(u, interior_mask):
     }
 
 
-#@profile
+@profile
 def main():
         # Load data
     LOAD_DIR = 'data'
