@@ -78,43 +78,47 @@ def helper(all_u0, all_interior_mask, MAX_ITER, ABS_TOL):
 
     return u.copy_to_host()
 
-
-
-#@profile
 def main():
-        # Load data
     LOAD_DIR = 'data'
     with open(join(LOAD_DIR, 'building_ids.txt'), 'r') as f:
         building_ids = f.read().splitlines()
 
     batch_size = 4
-    #building_ids = building_ids[:n_batches]
-
-    # Load floor plans
-    all_u0 = np.empty((batch_size, 514, 514))
-    all_interior_mask = np.empty((batch_size, 512, 512), dtype='bool')
-    for i, bid in enumerate(building_ids):
-        u0, interior_mask = load_data(LOAD_DIR, bid)
-        all_u0[i] = u0
-        all_interior_mask[i] = interior_mask
-
-    # Run jacobi iterations for each floor plan
-    MAX_ITER = 20000  #20_000
+    MAX_ITER = 20000
     ABS_TOL = 1e-4
 
-    all_u = np.empty_like(all_u0)
+    all_building_ids = []
+    all_u_list = []
+    all_mask_list = []
 
+    for batch_start in range(0, len(building_ids), batch_size):
+        batch_ids = building_ids[batch_start:batch_start + batch_size]
+        actual_batch_size = len(batch_ids)
 
-    #for i, (u, interior_mask) in enumerate(zip(all_u0, all_interior_mask)):
-        
-    all_u = helper(all_u0, all_interior_mask, MAX_ITER, ABS_TOL)
+        batch_u0 = np.empty((actual_batch_size, 514, 514))
+        batch_mask = np.empty((actual_batch_size, 512, 512), dtype=bool)
 
+        for i, bid in enumerate(batch_ids):
+            u0, mask = load_data(LOAD_DIR, bid)
+            batch_u0[i] = u0
+            batch_mask[i] = mask
 
-    # Print summary statistics in CSV format
+        batch_u = helper(batch_u0, batch_mask, MAX_ITER, ABS_TOL)
+
+        all_building_ids.extend(batch_ids)
+        all_u_list.append(batch_u)
+        all_mask_list.append(batch_mask)
+
+    # Concatenate results
+    all_u = np.concatenate(all_u_list, axis=0)
+    all_mask = np.concatenate(all_mask_list, axis=0)
+
+    # Print stats for everything at once
     stat_keys = ['mean_temp', 'std_temp', 'pct_above_18', 'pct_below_15']
-    print('building_id, ' + ', '.join(stat_keys))  # CSV header
-    for bid, u, interior_mask in zip(building_ids, all_u, all_interior_mask):
-        stats = summary_stats(u, interior_mask)
+    print('building_id, ' + ', '.join(stat_keys))
+
+    for bid, u, mask in zip(all_building_ids, all_u, all_mask):
+        stats = summary_stats(u, mask)
         print(f"{bid},", ", ".join(str(stats[k]) for k in stat_keys))
 
 if __name__ == '__main__':
