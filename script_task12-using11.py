@@ -79,11 +79,11 @@ def helper(all_u0, all_interior_mask, MAX_ITER, ABS_TOL):
     return u.copy_to_host()
 
 def main():
-    LOAD_DIR = 'data'
+    LOAD_DIR = '/dtu/projects/02613_2025/data/modified_swiss_dwellings/'
     with open(join(LOAD_DIR, 'building_ids.txt'), 'r') as f:
         building_ids = f.read().splitlines()
 
-    batch_size = 4
+    batch_size = 20
     MAX_ITER = 20000
     ABS_TOL = 1e-4
 
