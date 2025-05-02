@@ -14,10 +14,11 @@ def load_data(load_dir, bid):
 
 #5.69074 vs 8.7491
 @cuda.jit
-def jacobi(u, u_new, interior_mask, batch_size, height, width):
-    batch_idx, x, y = cuda.grid(3)
+def jacobi(u, u_new, interior_mask, height, width):
+    x, y = cuda.grid(2)
+    batch_idx = cuda.blockIdx.z  # batch dimension is the 3rd grid dim
 
-    if batch_idx < batch_size and x < height and y < width:
+    if batch_idx < u.shape[0] and x < height and y < width:
         if interior_mask[batch_idx, x, y]:
             x_u = x + 1
             y_u = y + 1
@@ -27,6 +28,7 @@ def jacobi(u, u_new, interior_mask, batch_size, height, width):
                 u[batch_idx, x_u - 1, y_u] +
                 u[batch_idx, x_u + 1, y_u]
             )
+
 
 
 def summary_stats(u, interior_mask):
@@ -44,19 +46,20 @@ def summary_stats(u, interior_mask):
 
 def helper(all_u0, all_interior_mask, MAX_ITER, ABS_TOL):
     batch_size = all_u0.shape[0]
-    threadsperblock = (4, 16, 16)  # batch, x, y threads
+    height = 512
+    width = 512
+
+    threadsperblock = (16, 16)
+    blockspergrid_x = (width + threadsperblock[0] - 1) // threadsperblock[0]
+    blockspergrid_y = (height + threadsperblock[1] - 1) // threadsperblock[1]
+    blockspergrid = (blockspergrid_x, blockspergrid_y, batch_size)
 
     u = cuda.to_device(np.copy(all_u0))
     u_new = cuda.to_device(np.copy(all_u0))
     interior_mask_d = cuda.to_device(all_interior_mask)
 
-    blockspergrid_b = (batch_size + threadsperblock[0] - 1) // threadsperblock[0]
-    blockspergrid_x = (512 + threadsperblock[1] - 1) // threadsperblock[1]
-    blockspergrid_y = (512 + threadsperblock[2] - 1) // threadsperblock[2]
-    blockspergrid = (blockspergrid_b, blockspergrid_x, blockspergrid_y)
-
     for k in range(MAX_ITER):
-        jacobi[blockspergrid, threadsperblock](u, u_new, interior_mask_d, batch_size, 512, 512)
+        jacobi[blockspergrid, threadsperblock](u, u_new, interior_mask_d, height, width)
         u, u_new = u_new, u
 
         if k % 100 == 0:
@@ -65,7 +68,6 @@ def helper(all_u0, all_interior_mask, MAX_ITER, ABS_TOL):
             u_center = u_host[:, 1:-1, 1:-1]
             u_new_center = u_new_host[:, 1:-1, 1:-1]
 
-            # Masked deltas: set non-interior positions to 0 (won't affect max)
             delta_field = np.abs(u_center - u_new_center)
             masked_delta = np.where(all_interior_mask, delta_field, 0)
             max_delta = masked_delta.max()
@@ -74,9 +76,8 @@ def helper(all_u0, all_interior_mask, MAX_ITER, ABS_TOL):
                 print("k at break", k)
                 break
 
-                
-
     return u.copy_to_host()
+
 
 
 #@profile
