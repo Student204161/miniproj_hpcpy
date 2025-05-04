@@ -28,9 +28,6 @@ def jacobi(u, interior_mask, max_iter, atol=1e-6):
 
     return u
 
-
-
-
 #5.69074 vs 8.7491
 
 @jit(nopython=True)

@@ -3,6 +3,8 @@ import sys
 import numpy as np
 from numba import jit
 from numba import cuda
+import time
+
 
 def load_data(load_dir, bid):
     SIZE = 512
@@ -75,14 +77,14 @@ def helper(u0, interior_mask, MAX_ITER):
     return u
 
 
-@profile
+#@profile
 def main():
         # Load data
-    LOAD_DIR = 'data'
+    LOAD_DIR = '/dtu/projects/02613_2025/data/modified_swiss_dwellings/'
     with open(join(LOAD_DIR, 'building_ids.txt'), 'r') as f:
         building_ids = f.read().splitlines()
 
-    N = 4
+    N = 20
     building_ids = building_ids[:N]
 
     # Load floor plans
@@ -114,5 +116,8 @@ def main():
         print(f"{bid},", ", ".join(str(stats[k]) for k in stat_keys))
 
 if __name__ == '__main__':
+    start = time.time()
     main()
+    end = time.time()
+    print(f"\nTotal execution time: {end - start:.4f} seconds")
     
