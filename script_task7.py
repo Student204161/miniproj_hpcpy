@@ -29,7 +29,7 @@ def jacobi(u, interior_mask, max_iter, atol=1e-6):
     return u
 
 #5.69074 vs 8.7491
-
+# N=20, 209.92
 @jit(nopython=True)
 def jacobi(u, interior_mask, max_iter, atol=1e-6):
     u = np.copy(u)  # shape: (514, 514)
@@ -78,12 +78,12 @@ def summary_stats(u, interior_mask):
     }
 @profile
 def main():
-        # Load data
-    LOAD_DIR = 'data'
+    # Load data
+    LOAD_DIR = '/dtu/projects/02613_2025/data/modified_swiss_dwellings/'
     with open(join(LOAD_DIR, 'building_ids.txt'), 'r') as f:
         building_ids = f.read().splitlines()
 
-    N = 4
+    N = 20
     building_ids = building_ids[:N]
 
     # Load floor plans
